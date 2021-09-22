@@ -1,10 +1,13 @@
 # import the necessary packages
 import argparse
 import os
+import pathlib
+import socket
+from urllib.request import urlretrieve
 
-import cv2
-import requests
-from imutils import paths
+from PIL import Image
+
+socket.setdefaulttimeout(60)  # 60 seconds
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -21,14 +24,11 @@ total = 0
 # loop the URLs
 for url in rows:
     try:
-        # try to download the image
-        r = requests.get(url, timeout=60)
-        # save the image to disk
+        # get new file path
         p = os.path.sep.join([args["output"], "{}.jpg".format(
             str(total).zfill(8))])
-        f = open(p, "wb")
-        f.write(r.content)
-        f.close()
+        # try to download the image
+        urlretrieve(url, p)
         # update the counter
         print("[INFO] downloaded: {}".format(p))
         total += 1
@@ -37,12 +37,12 @@ for url in rows:
         print("[INFO] error downloading {}...skipping".format(p))
 
 # loop over the image paths we just downloaded
-for imagePath in paths.list_images(args["output"]):
+for imagePath in pathlib.Path(args["output"]).glob('*'):
     # initialize if the image should be deleted or not
     delete = False
     # try to load the image
     try:
-        image = cv2.imread(imagePath)
+        image = Image.open(imagePath)
         # if the image is `None` then we could not properly load it
         # from disk, so delete it
         if image is None:
@@ -52,7 +52,7 @@ for imagePath in paths.list_images(args["output"]):
     except:
         print("Except")
         delete = True
-    # check to see if the image should be deleted
+    # check to see if the image should be delete
     if delete:
         print("[INFO] deleting {}".format(imagePath))
         os.remove(imagePath)
