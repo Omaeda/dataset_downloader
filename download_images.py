@@ -36,7 +36,7 @@ def main():
             total += 1
         # handle if any exceptions are thrown during the download process
         except:
-            print("[INFO] error downloading {}...skipping".format(p))
+            print("[INFO] error downloading {}...skipping".format(url))
 
     # loop over the image paths we just downloaded
     for imagePath in pathlib.Path(args["output"]).glob('*'):
